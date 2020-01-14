@@ -23,6 +23,7 @@
 
 
 static float pwm_gradient; // Precalulated value to speed up rpm to PWM conversions.
+uint32_t S_step_cnt = 0;   //M19 step cnt
 
 
 void spindle_init()
@@ -31,14 +32,22 @@ void spindle_init()
   SPINDLE_PWM_DDR |= (1<<SPINDLE_PWM_BIT); // Configure as PWM output pin.
   SPINDLE_TCCRA_REGISTER = SPINDLE_TCCRA_INIT_MASK; // Configure PWM output compare timer
   SPINDLE_TCCRB_REGISTER = SPINDLE_TCCRB_INIT_MASK;
-  SPINDLE_OCRA_REGISTER = SPINDLE_OCRA_TOP_VALUE; // Set the top value for 16-bit fast PWM mode
+  // SPINDLE_OCRA_REGISTER = SPINDLE_OCRA_TOP_VALUE; // Set the top value for 16-bit fast PWM mode
   SPINDLE_ENABLE_DDR |= (1<<SPINDLE_ENABLE_BIT); // Configure as output pin.
   SPINDLE_DIRECTION_DDR |= (1<<SPINDLE_DIRECTION_BIT); // Configure as output pin.
-
+  
+  TIMSK4 |= (1 << OCIE4A);
   pwm_gradient = SPINDLE_PWM_RANGE/(settings.rpm_max-settings.rpm_min);
   spindle_stop();
 }
 
+ISR(TIMER4_COMPA_vect) { S_step_cnt++; }
+
+void mod_steps() {			//called by dwell_angle in motion_control
+	S_step_cnt = S_step_cnt % STEPS_PER_REV;
+}
+
+int S_step_count() { return S_step_cnt; }
 
 uint8_t spindle_get_state()
 {
@@ -143,7 +152,7 @@ void spindle_set_speed(uint16_t pwm_value)
   uint16_t spindle_compute_pwm_value(float rpm) // Mega2560 PWM register is 16-bit.
   {
 	uint16_t pwm_value;
-	rpm *= (0.010*sys.spindle_speed_ovr); // Scale by spindle speed override value.
+	//rpm *= (0.010*sys.spindle_speed_ovr); // Scale by spindle speed override value.
 	// Calculate PWM register value based on rpm max/min settings and programmed rpm.
 	if ((settings.rpm_min >= settings.rpm_max) || (rpm >= settings.rpm_max)) {
 	  // No PWM range possible. Set simple on/off spindle control pin state.
@@ -161,7 +170,8 @@ void spindle_set_speed(uint16_t pwm_value)
 	  // Compute intermediate PWM value with linear spindle speed model.
 	  // NOTE: A nonlinear model could be installed here, if required, but keep it VERY light-weight.
 	  sys.spindle_speed = rpm;
-	  pwm_value = floor((rpm-settings.rpm_min)*pwm_gradient) + SPINDLE_PWM_MIN_VALUE;
+	  //pwm_value = floor((rpm-settings.rpm_min)*pwm_gradient) + SPINDLE_PWM_MIN_VALUE;
+	  pwm_value = 18750 / rpm;    //16 Mhz / 3200 (pulses/rev) / 16 prescaler * 60 sec 
 	}
 	return(pwm_value);
   }
