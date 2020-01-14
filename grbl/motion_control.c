@@ -199,6 +199,18 @@ void mc_dwell(float seconds)
   delay_sec(seconds, DELAY_MODE_DWELL);
 }
 
+void mc_dwell_angle(float angle)
+{
+	mod_steps();		//calculates modulus once
+	//S_step_cnt = S_step_cnt % STEPS_PER_REV;
+	uint16_t target_steps = angle * STEPS_PER_REV;
+	if (target_steps < S_step_count()) {
+		target_steps += STEPS_PER_REV;
+	}
+	while (S_step_count() < target_steps) {
+		_delay_ms(1);
+	}
+}
 
 // Perform homing cycle to locate and set machine zero. Only '$H' executes this command.
 // NOTE: There should be no motions in the buffer and Grbl must be in an idle state before
