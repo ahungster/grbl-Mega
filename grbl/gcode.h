@@ -56,6 +56,7 @@
 // Modal Group G0: Non-modal actions
 #define NON_MODAL_NO_ACTION 0 // (Default: Must be zero)
 #define NON_MODAL_DWELL 4 // G4 (Do not alter value)
+#define NON_MODAL_DWELL_ANGLE 19 // M19
 #define NON_MODAL_SET_COORDINATE_DATA 10 // G10 (Do not alter value)
 #define NON_MODAL_GO_HOME_0 28 // G28 (Do not alter value)
 #define NON_MODAL_SET_HOME_0 38 // G28.1 (Do not alter value)
