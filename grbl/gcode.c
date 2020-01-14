@@ -266,6 +266,10 @@ uint8_t gc_execute_line(char *line)
               case 9: gc_block.modal.coolant = COOLANT_DISABLE; break; // M9 disables both M7 and M8.
             }
             break;
+	  case 19:		//Add support for M19 (dwell till certain spindle angle)
+	    word_bit = NON_MODAL_DWELL_ANGLE;  
+	    gc_block.non_modal_command = int_value;
+	    break;			
           #ifdef ENABLE_PARKING_OVERRIDE_CONTROL
             case 56:
               word_bit = MODAL_GROUP_M9;
@@ -566,6 +570,13 @@ uint8_t gc_execute_line(char *line)
         }
       }
       break;
+		  
+    case  NON_MODAL_DWELL_ANGLE:
+	if (bit_istrue(value_words, bit(WORD_P))) { mc_dwell_angle(gc_block.values.p); }
+	else if (bit_istrue(value_words, bit(WORD_R))) { mc_dwell_angle(gc_block.values.r); }
+	else { FAIL(STATUS_GCODE_VALUE_WORD_MISSING); } // [P word missing]
+	bit_false(value_words, (bit(WORD_P) | bit(WORD_R)));
+	break;
 
     default:
 
