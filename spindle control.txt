@@ -8,3 +8,5 @@ This mod is for machines with spindle controlled by stepper motor.  The added co
 While stock grbl has a set pwm frequency of 4000 Hz, this mod varies the frequency using CTC mode (clear timer on Compare Match).  To achieve sufficient rpm range, it uses 16-bit timer-4 in the Mega 2560.  In current setting, the prescaler is set to 1/64.  This results in 1% error at 100 rpm, and 3% error at 200 rpm.  Setting prescaler to 1/8 can greatly increases precision.  
 
 Stepper.c is modified to no longer changes spindle speed.  Otherwise it changes the rpm to unintended values, and results in system stutter.  
+
+as of 1/16/2020, when G1 command is followed by M19, M19 gets executed first, which is incorrect.  
