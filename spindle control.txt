@@ -1,10 +1,10 @@
 Grbl modification for spindle angle control
 
-This mod is for machines with spindle controlled by stepper motor.  The added code allows accurate control of the spindle speed and position.   Use the following gcodes: 
+This mod is for machines with spindle controlled by stepper motor.  The added code allows accurate control of the spindle speed and position.   Use the following Gcodes: 
   M4 S20	  turn spindle at 20 rpm
   M19 P30	  pause other commands until spindle rotates to 30 degrees from initial position
   M19 R30.2 pause other commands until spindle rotates to 30.2 degrees 
 
-While stock grbl has a set pwm frequency of 4000 Hz, this mod varies the frequency using CTC mode (clear timer on Compare Match).  To achieve sufficient timing accuracy over wide rpm range, it uses 16-bit timer-4 in the Mega 2560.  Drive spindle with pin 6 (instead of 7) for 50% duty.  
+While stock grbl has a set pwm frequency of 4000 Hz, this mod varies the frequency using CTC mode (clear timer on Compare Match).  To achieve sufficient rpm range, it uses 16-bit timer-4 in the Mega 2560.  In current setting, the prescaler is set to 1/64.  This results in 1% error at 100 rpm, and 3% error at 200 rpm.  Setting prescaler to 1/8 can greatly increases precision.  
 
-On 1/14/2020, there is still an issue.  When spindle is not turning, the z movement at feed rate above 20 can be sporatic.  
+Stepper.c is modified to no longer changes spindle speed.  Otherwise it changes the rpm to unintended values, and results in system stutter.  
