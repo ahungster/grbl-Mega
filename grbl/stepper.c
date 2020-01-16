@@ -437,7 +437,7 @@ ISR(TIMER1_COMPA_vect)
       #endif
 
       // Set real-time spindle output as segment is loaded, just prior to the first step.
-      spindle_set_speed(st.exec_segment->spindle_pwm);
+//      spindle_set_speed(st.exec_segment->spindle_pwm);   //if enabled, it causes havoc for stepper_spindle mode.  
 
     } else {
       // Segment buffer empty. Shutdown.
