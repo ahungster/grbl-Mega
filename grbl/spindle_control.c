@@ -21,9 +21,16 @@
 
 #include "grbl.h"
 
-
-static float pwm_gradient; // Precalulated value to speed up rpm to PWM conversions.
 uint32_t S_step_cnt = 0;   //M19 step cnt
+static float pwm_gradient; // Precalulated value to speed up rpm to PWM conversions.
+
+ISR(TIMER4_COMPA_vect) { S_step_cnt++; }
+
+void mod_steps() {	//called when M19 
+	S_step_cnt = S_step_cnt % STEPS_PER_REV;
+}
+
+int S_step_count() { return S_step_cnt; }  //called when M19 
 
 
 void spindle_init()
@@ -32,11 +39,10 @@ void spindle_init()
   SPINDLE_PWM_DDR |= (1<<SPINDLE_PWM_BIT); // Configure as PWM output pin.
   SPINDLE_TCCRA_REGISTER = SPINDLE_TCCRA_INIT_MASK; // Configure PWM output compare timer
   SPINDLE_TCCRB_REGISTER = SPINDLE_TCCRB_INIT_MASK;
-  // SPINDLE_OCRA_REGISTER = SPINDLE_OCRA_TOP_VALUE; // Set the top value for 16-bit fast PWM mode
+  SPINDLE_OCRA_REGISTER = SPINDLE_OCRA_TOP_VALUE; // Set the top value for 16-bit fast PWM mode
   SPINDLE_ENABLE_DDR |= (1<<SPINDLE_ENABLE_BIT); // Configure as output pin.
   SPINDLE_DIRECTION_DDR |= (1<<SPINDLE_DIRECTION_BIT); // Configure as output pin.
   
-  TIMSK4 |= (1 << OCIE4A);
   pwm_gradient = SPINDLE_PWM_RANGE/(settings.rpm_max-settings.rpm_min);
   spindle_stop();
 }
@@ -69,6 +75,7 @@ uint8_t spindle_get_state()
 void spindle_stop()
 {
   SPINDLE_TCCRA_REGISTER &= ~(1<<SPINDLE_COMB_BIT); // Disable PWM. Output voltage is zero.
+  TIMSK4 &= ~(1 << OCIE4A);		//disable interrupt
   #ifdef INVERT_SPINDLE_ENABLE_PIN
     SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);  // Set pin to high
   #else
@@ -81,7 +88,9 @@ void spindle_stop()
 // and stepper ISR. Keep routine small and efficient.
 void spindle_set_speed(uint16_t pwm_value)
 {
-  SPINDLE_OCR_REGISTER = pwm_value; // Set PWM output level.
+   SPINDLE_OCRA_REGISTER = pwm_value;
+   SPINDLE_OCR_REGISTER = (pwm_value >>1); // Set PWM output level.
+   TIMSK4 |= (1 << OCIE4A);	//enable interrupt
   #ifdef SPINDLE_ENABLE_OFF_WITH_ZERO_SPEED
     if (pwm_value == SPINDLE_PWM_OFF_VALUE) {
       spindle_stop();
@@ -171,7 +180,7 @@ void spindle_set_speed(uint16_t pwm_value)
 	  // NOTE: A nonlinear model could be installed here, if required, but keep it VERY light-weight.
 	  sys.spindle_speed = rpm;
 	  //pwm_value = floor((rpm-settings.rpm_min)*pwm_gradient) + SPINDLE_PWM_MIN_VALUE;
-	  pwm_value = 18750 / rpm;    //16 Mhz / 3200 (pulses/rev) / 16 prescaler * 60 sec 
+	  pwm_value = 4687.5 / rpm;    //16 Mhz / 3200 (pulses/rev) / 16 prescaler * 60 sec 
 	}
 	return(pwm_value);
   }
