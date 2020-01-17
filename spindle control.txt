@@ -9,4 +9,4 @@ While stock grbl has a set pwm frequency of 4000 Hz, this mod varies the frequen
 
 Stepper.c is modified to no longer changes spindle speed.  Otherwise it changes the rpm to unintended values, and results in system stutter.  
 
-as of 1/16/2020, when G1 command is followed by M19, M19 gets executed first, which is incorrect.  
+1/17/2020:  Should be fully working.  Please message me for any issues.  
