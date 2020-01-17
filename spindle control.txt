@@ -9,4 +9,5 @@ While stock grbl has a set pwm frequency of 4000 Hz, this mod varies the frequen
 
 Stepper.c is modified to no longer changes spindle speed.  Otherwise it changes the rpm to unintended values, and results in system stutter.  
 
-1/17/2020:  Should be fully working.  Please message me for any issues.  
+1/17/2020:  Ardino compiler 1.8.6~1.8.9 seems to have a bug, causing segmentation error when compileing.  
+Otherwise, everything should be working.  Please message me for any issues.  
