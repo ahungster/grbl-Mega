@@ -201,13 +201,13 @@ void mc_dwell(float seconds)
 
 void mc_dwell_angle(float angle)
 {
+	uint16_t target_steps = angle * STEPS_PER_DEG;
 	protocol_buffer_synchronize();
 	mod_steps();		//calculates modulus once
 	//S_step_cnt = S_step_cnt % STEPS_PER_REV;
-	uint16_t target_steps = angle * STEPS_PER_REV;
 	if (target_steps < S_step_count()) {
 		target_steps += STEPS_PER_REV;
-	}
+	}	//angle already passed for this revolution
 	while (S_step_count() < target_steps) {
 		_delay_ms(1);
 	}
