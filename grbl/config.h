@@ -253,7 +253,8 @@
 #define RAPID_OVERRIDE_LOW       25 // Percent of rapid (1-99). Usually 25%.
 // #define RAPID_OVERRIDE_EXTRA_LOW 5 // *NOT SUPPORTED* Percent of rapid (1-99). Usually 5%.
 
-#define STEPS_PER_REV			3200 // 360 / 1.8 * 16 ustep * gear ratio
+#define STEPS_PER_REV			1600 // 360 / 1.8 * 8 ustep * gear ratio
+#define STEPS_PER_DEG			4.44 // 1600/360 
 #define DEFAULT_SPINDLE_SPEED_OVERRIDE    100 // 100%. Don't change this value.
 #define MAX_SPINDLE_SPEED_OVERRIDE        200 // Percent of programmed spindle speed (100-255). Usually 200%.
 #define MIN_SPINDLE_SPEED_OVERRIDE         10 // Percent of programmed spindle speed (1-100). Usually 10%.
